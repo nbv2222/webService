@@ -1,8 +1,12 @@
 package ru.tinkoff.dao;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -12,13 +16,21 @@ import ru.tinkoff.dao.interfaces.AbstractOrderDAO;
 import ru.tinkoff.entities.Order;
 
 import javax.sql.DataSource;
+import java.io.FileNotFoundException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 
+import static java.lang.String.format;
+
 @Repository
 public class OrderDAO extends AbstractOrderDAO {
+    private static final Logger logger = LoggerFactory.getLogger(OrderDAO.class);
     private NamedParameterJdbcTemplate jdbcTemplate;
+
+    //sql constants
+    @Value("${getLastOrderByAccountId.select}")
+    private String getLastOrderByAccountIdSQL;
 
     @Autowired
     public OrderDAO(DataSource dataSource) {
@@ -26,19 +38,23 @@ public class OrderDAO extends AbstractOrderDAO {
     }
 
     public Order getLastOrderByAccountId(Long id) {
-        String sql = "SELECT" +
-                " APPLICATION_ID," +
-                " order_tbl.CONTACT_ID," +
-                " max(DT_CREATED) AS DT_CREATED," +
-                " PRODUCT_NAME" +
-                " FROM order_tbl" +
-                " INNER JOIN account_tbl ON order_tbl.CONTACT_ID = account_tbl.CONTACT_ID" +
-                " WHERE account_tbl.CONTACT_ID = :id" +
-                " GROUP BY APPLICATION_ID" +
-                " LIMIT 1";
+        logger.info(format(START_METHOD, GET_LAST_ORDER_BY_ACCOUNT_ID_METHOD));
+
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("id", id);
-        return jdbcTemplate.queryForObject(sql, params, new OrderRowMapper());
+        Order order;
+
+
+        try {
+            order = jdbcTemplate.queryForObject(getLastOrderByAccountIdSQL, params, new OrderRowMapper());
+        } catch (EmptyResultDataAccessException up) {
+            logger.debug(DB_GET_ERROR);
+            throw up;
+        }
+
+        logger.debug(format(GET_OBJECT, "order", order));
+        logger.info(format(END_METHOD, GET_LAST_ORDER_BY_ACCOUNT_ID_METHOD));
+        return order;
     }
 
     private static final class OrderRowMapper implements RowMapper<Order> {
@@ -46,11 +62,18 @@ public class OrderDAO extends AbstractOrderDAO {
         @Nullable
         public Order mapRow(ResultSet rs, int rowNum) throws SQLException {
             Order order = new Order();
-            order.setApplication_id(rs.getLong("APPLICATION_ID"));
-            order.setContact_id(rs.getLong("CONTACT_ID"));
-            order.setDt_created(LocalDateTime.parse(rs.getString("DT_CREATED").replace(" ", "T")));
+            order.setApplicationId(rs.getLong("APPLICATION_ID"));
+            order.setContactId(rs.getLong("CONTACT_ID"));
+            order.setDtCreated(LocalDateTime.parse(rs.getString("DATE_CREATED").replace(" ", "T")));
             order.setProductName(rs.getString("PRODUCT_NAME"));
             return order;
         }
+    }
+
+    public static void main(String[] args) throws FileNotFoundException {
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("spring-dao.xml");
+        OrderDAO orderDao = (OrderDAO) applicationContext.getBean("orderDAO");
+        System.out.println(orderDao.getLastOrderByAccountId(1L));
+        System.out.println(orderDao.getLastOrderByAccountIdSQL);
     }
 }

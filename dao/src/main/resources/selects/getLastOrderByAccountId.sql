@@ -1,7 +1,10 @@
 SELECT
   APPLICATION_ID,
   order_tbl.CONTACT_ID,
-  max(DT_CREATED)
+  max(DATE_CREATED),
+  PRODUCT_NAME
 FROM order_tbl
   INNER JOIN account_tbl ON order_tbl.CONTACT_ID = account_tbl.CONTACT_ID
-WHERE account_tbl.CONTACT_ID = 1
+WHERE account_tbl.CONTACT_ID = :id
+GROUP BY APPLICATION_ID
+LIMIT 1
