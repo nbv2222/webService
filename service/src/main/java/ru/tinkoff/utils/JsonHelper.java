@@ -12,7 +12,7 @@ public class JsonHelper {
         try {
             return mapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
-           return exceptionJson(e);
+            return exceptionJson(e);
         }
     }
 

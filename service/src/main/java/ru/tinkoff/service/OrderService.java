@@ -1,25 +1,41 @@
 package ru.tinkoff.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import ru.tinkoff.Order;
 import ru.tinkoff.dao.interfaces.AbstractOrderDAO;
-import ru.tinkoff.entities.Order;
 import ru.tinkoff.interfaces.AbstractOrderService;
+import ru.tinkoff.utils.JsonHelper;
+import ru.tinkoff.utils.XmlHelper;
 
 @Service
 public class OrderService extends AbstractOrderService {
-    @Autowired
+    private static final Logger logger = LoggerFactory.getLogger(OrderService.class);
+
+    private static final String XML = "XML";
+    private static final String JSON = "JSON";
+
     private AbstractOrderDAO orderDAO;
 
-    public Order getLastOrderByAccountId(Long id) {
-        Order order;
+    @Autowired
+    public OrderService(AbstractOrderDAO orderDAO) {
+        this.orderDAO = orderDAO;
+    }
+
+    public String getLastOrderByAccountId(Long id, String responseType) {
+        Order lastOrderByAccountId;
+
         try {
-            order = orderDAO.getLastOrderByAccountId(id);
-        } catch (EmptyResultDataAccessException up) {
-            //place for logger
-            throw up;
+            lastOrderByAccountId = orderDAO.getLastOrderByAccountId(id);
+        } catch (Exception e) {
+            logger.debug(e.getMessage());
+            return JsonHelper.exceptionJson(e);
         }
-        return order;
+
+        return XML.equalsIgnoreCase(responseType)
+                ? XmlHelper.convert(lastOrderByAccountId)
+                : JsonHelper.convert(lastOrderByAccountId);
     }
 }
