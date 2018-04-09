@@ -4,18 +4,20 @@ import junit.framework.TestCase;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import ru.tinkoff.Order;
 
 import java.time.LocalDateTime;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @ContextConfiguration(locations = "classpath:spring-dao-test.xml")
-public class OrderDAOTest extends TestCase {
+@SpringBootTest
+public class OrderDAOUnitTest extends TestCase {
 
     @Autowired
-    OrderDAO orderDAO;
+    private OrderDAO orderDAO;
 
     @Test
     public void testGetLastOrderByAccountId() throws Exception {

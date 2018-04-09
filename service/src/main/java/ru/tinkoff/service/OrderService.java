@@ -1,7 +1,5 @@
 package ru.tinkoff.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.tinkoff.Order;
@@ -12,7 +10,6 @@ import ru.tinkoff.utils.XmlHelper;
 
 @Service
 public class OrderService extends AbstractOrderService {
-    private static final Logger logger = LoggerFactory.getLogger(OrderService.class);
 
     private static final String XML = "XML";
     private static final String JSON = "JSON";
@@ -30,7 +27,6 @@ public class OrderService extends AbstractOrderService {
         try {
             lastOrderByAccountId = orderDAO.getLastOrderByAccountId(id);
         } catch (Exception e) {
-            logger.debug(e.getMessage());
             return JsonHelper.exceptionJson(e);
         }
 
@@ -39,3 +35,4 @@ public class OrderService extends AbstractOrderService {
                 : JsonHelper.convert(lastOrderByAccountId);
     }
 }
+

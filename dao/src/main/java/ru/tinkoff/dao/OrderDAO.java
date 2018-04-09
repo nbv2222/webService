@@ -1,7 +1,5 @@
 package ru.tinkoff.dao;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -17,14 +15,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 
-import static java.lang.String.format;
-
 @Repository
 public class OrderDAO extends AbstractOrderDAO {
-    private static final Logger logger = LoggerFactory.getLogger(OrderDAO.class);
+
     private NamedParameterJdbcTemplate jdbcTemplate;
 
-    //sql constants
     @Value("${getLastOrderByAccountId.select}")
     private String getLastOrderByAccountIdSQL;
 
@@ -34,7 +29,6 @@ public class OrderDAO extends AbstractOrderDAO {
     }
 
     public Order getLastOrderByAccountId(Long id) {
-        logger.info(format(START_METHOD, GET_LAST_ORDER_BY_ACCOUNT_ID_METHOD));
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("id", id);
         Order order;
@@ -42,12 +36,9 @@ public class OrderDAO extends AbstractOrderDAO {
         try {
             order = jdbcTemplate.queryForObject(getLastOrderByAccountIdSQL, params, new OrderRowMapper());
         } catch (EmptyResultDataAccessException up) {
-            logger.debug(String.format("%s %s", DB_GET_ERROR, up.getMessage()));
             throw up;
         }
 
-        logger.debug(format(GET_OBJECT, "order", order));
-        logger.info(format(END_METHOD, GET_LAST_ORDER_BY_ACCOUNT_ID_METHOD));
         return order;
     }
 
