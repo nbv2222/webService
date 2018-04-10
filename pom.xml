@@ -18,14 +18,9 @@
         <spring.version>5.0.5.RELEASE</spring.version>
         <spring.boot.version>2.0.0.RELEASE</spring.boot.version>
         <h2db.version>1.4.196</h2db.version>
-        <servlet.API.version>4.0.0</servlet.API.version>
         <jackson.version>2.9.5</jackson.version>
-        <log4j.version>2.10.0</log4j.version>
-        <compiler.version>1.8</compiler.version>
         <lombok.version>1.16.20</lombok.version>
-        <jackson.version>2.9.5</jackson.version>
-        <junit.version>4.12</junit.version>
-        <jstl.version>1.2</jstl.version>
+        <mvn.compiler.version>1.8</mvn.compiler.version>
         <mvn.surfire.plugin.version>2.21.0</mvn.surfire.plugin.version>
 
     </properties>
@@ -36,8 +31,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>${compiler.version}</source>
-                    <target>${compiler.version}</target>
+                    <source>${mvn.compiler.version}</source>
+                    <target>${mvn.compiler.version}</target>
                 </configuration>
             </plugin>
             <plugin>
